@@ -1,7 +1,4 @@
 import re
-# ------------------------------------------
-# Data pre-processing statrs here
-# ------------------------------------------
 
 # Create the abbreviations list
 AbbrList = {
@@ -134,6 +131,4 @@ def ReplaceCommonAbbr(text):
     return comp.sub(lambda m: AbbrList.get(m.group(0)), text)
 
 
-print('---------------------------------------------')
-print('Remove common Abbreiavation function is ready')
-print('---------------------------------------------')
+
