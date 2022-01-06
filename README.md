@@ -1,4 +1,4 @@
-# Depression-Detection-in-Social-Media-via-Differential-Text-Embedding
+# Depression Detection in Social Media via Differential Text Embedding
 Contains supplementary materials and information for W3PHIAI-22's paper "Depression Detection in Social Media via Differential Text Embedding"
 
 
