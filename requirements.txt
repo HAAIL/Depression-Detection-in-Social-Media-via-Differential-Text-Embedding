@@ -1,0 +1,13 @@
+pandas
+numpy
+matplotlib
+sklearn
+textblob
+re
+time
+scipy
+logging
+typing
+sentence_transformers
+ftfy
+seaborn
