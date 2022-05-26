@@ -127,168 +127,355 @@ class SentenceSimilarity2():
 
 # using SBERT model and get BERT embeddings of the tweets
 
-all_tweet = pd.read_csv("experiment8-final-set.csv")
-all_tweets = all_tweet['tweet']
-ard = all_tweet[all_tweet['Depressed'] == 1]
-ard = np.array(ard['tweet'])
-#
-examples = Dataset("dysfunctional_thoughts_examples.txt")
-sentence_sim2 = SentenceSimilarity2(examples)
-#
-df1 = pd.read_csv('examples-embeddings.csv')
-#
-#
-# # #
-# # #------------------------------------------------#
-# # #-----------------Build dataset------------------#
-# # #------------------------------------------------#
-# #
-# #
-thoughts_dict = {}
-xls           = ExcelFile('thoughts_categories.xlsx')
-df            = xls.parse(xls.sheet_names[0])
-df.columns    = ['Category', 'Example', 'ID']
-columns = list(df)
+# all_tweet = pd.read_csv("experiment5-final-set.csv")
+# all_tweets = all_tweet['tweet']
+# ard = all_tweet[all_tweet['Depressed'] == 1]
+# ard = np.array(ard['tweet'])
 
-for r in range (0,df.shape[0]):
-    for i in columns:
-        if i =='Category':
-            if df[i][r] not in thoughts_dict.keys():
-                thoughts_dict[df[i][r]] = [df['Example'][r]]
-                break
-            else:
-                thoughts_dict[df[i][r]].append(df['Example'][r])
-                break
-        else:
-            break
-#
-#
-# # # A function that utlizes get_most_similar to be used later
-def get_thoughts_features(tweet):
-    most_similar_types, emb,q, ids = sentence_sim2.get_most_similar(tweet)
-    most_similar_by_c = {}
-    for i in most_similar_types.keys():
-        for c, e in thoughts_dict.items():
-            if i in e:
-                if c not in most_similar_by_c:
-                    most_similar_by_c[c] = [i]
-                else:
-                    most_similar_by_c[c].append(i)
+result = pd.read_csv("bert-dys-emb-combined.csv")
+result = result.dropna()
+y = result['Depressed'].astype('int')
 
-    return most_similar_by_c
+# mean_emb = []
+# cl = []
+# for i,entity in result.iterrows():
+#     dys = []
+#     for d in range (0,7):
+#         array = result.iloc[i,(d*768)+1:(d*768)+768]
+#         dys.append(array)
+#     m = np.mean(dys, axis = 0)
+#     mean_emb.append(m)
+#
+# emb_mean_df = pd.DataFrame.from_records(mean_emb)
+# emb_mean_df.to_csv('set5-emb-mean.csv', index=False)
+# twee = Dataset('tweets_text_experiment5.txt')
+# sentence_sim = SentenceSimilarity(twee)
+# emb_tweets = sentence_sim.embedded_sentences
+# emb_tweets_df = pd.DataFrame.from_records(emb_tweets)
+# emb_tweets_df.to_csv('final-set5-emb.csv', index=False)
+#
+# data = pd.read_csv("experiment7-final-set.csv")
+# examples = Dataset("dysfunctional_thoughts_examples.txt")
+# sentence_sim2 = SentenceSimilarity2(examples)
+# most_similar ,embds,qembed,c = sentence_sim2.get_most_similar("I always fail")  # Most similar contains the top 7 sentences (as i Specefied)  and its cosine distances as key,valu
+# # print(type(most_similar))
+# print(type(most_similar[0]))
+
+# print(len(embds))
+# df = pd.DataFrame(embds)
+# # Declare a list that is to be converted into a column
+# id = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,
+# 60,61,62,63]
+# #
+# df['cluidster'] = id
+# df.to_csv(r'examples-embeddings.csv')
+# df1 = pd.read_csv('examples-embeddings.csv')
+#
+# df1.rename( columns={'Unnamed: 0':'example id'}, inplace=True )
+# closest_anchor = []
+# for i, entity in data.iterrows():
+#     t = entity['tweet']
+#     a, b, c, d = sentence_sim2.get_most_similar(t)
+#     closest_anchor.append(d)
+
+# print(closest_anchor)
+
+# closest_anchor   = pd.DataFrame.from_records(closest_anchor)
+# closest_anchor.to_csv('closest_anchor1.csv', index=False)
+
+# close_emb = []
+# for i in closest_anchor:
+#     close_emb.append(df[df['example id']==i])
+#
+# close_emb   = pd.DataFrame.from_records(close_emb)
+# close_emb.to_csv('close_emb7.csv', index=False)
+
+# tweets_embedding = pd.read_csv("experiment1-emb.csv")
+# diff_embed = []
+#
+# close_emb = pd.read_csv("close_emb1.csv")
+# for i, entity in tweets_embedding.iterrows():
+#     tweet_vector  = pd.to_numeric(tweets_embedding.iloc[i])
+#     anchor_vector = pd.to_numeric(list(close_emb.iloc[i, 1:-1]))
+#     diff_embed.append(np.subtract(list(tweet_vector), anchor_vector))
+
+# print(len(diff_embed))
+# diff_embed   = pd.DataFrame.from_records(diff_embed)
+# diff_embed.to_csv('diff_embed1.csv', index=False)
+
+# #
+# #------------------------------------------------#
+# #-----------------Build dataset------------------#
+# #------------------------------------------------#
+#
+#
+# thoughts_dict = {}
+# xls           = ExcelFile('thoughts_categories.xlsx')
+# df            = xls.parse(xls.sheet_names[0])
+# df.columns    = ['Category', 'Example', 'ID']
+# columns = list(df)
+#
+# for r in range (0,df.shape[0]):
+#     for i in columns:
+#         if i =='Category':
+#             if df[i][r] not in thoughts_dict.keys():
+#                 thoughts_dict[df[i][r]] = [df['Example'][r]]
+#                 break
+#             else:
+#                 thoughts_dict[df[i][r]].append(df['Example'][r])
+#                 break
+#         else:
+#             break
+# #
+# # thoughts_dict2 = {}
+# # xls           = ExcelFile('thoughts_categories2.xlsx')
+# # df2            = xls.parse(xls.sheet_names[0])
+# # df2.columns    = ['Category', 'Example']
+# # columns2 = list(df2)
+# #
+# # for r in range (0,df2.shape[0]):
+# #     for i in columns2:
+# #         if i =='Category':
+# #             if df2[i][r] not in thoughts_dict2.keys():
+# #                 thoughts_dict2[df2[i][r]] = [df2['Example'][r]]
+# #                 break
+# #             else:
+# #                 thoughts_dict2[df2[i][r]].append(df2['Example'][r])
+# #                 break
+# #         else:
+# #             break
+#
+# # An example of using the get_most_similar function
+# most_similar ,embds, q_embed = sentence_sim.get_most_similar("I always fail")  # Most similar contains the top 7 sentences (as i Specefied)  and its cosine distances as key,value
+#                                                                       # embds contains the embeddings for the examples
+# # most_similar2 ,embds2, q_embed2 = sentence_sim2.get_most_similar("I always fail")  # Most similar contains the top 7 sentences (as i Specefied)  and its cosine distances as key,value
+#
+# # Getting the top similar sentences
+# most_similar_by_c = {}
+# for i in most_similar.keys():
+#     for dystype, e in thoughts_dict.items():
+#         if i in e:
+#             if dystype not in most_similar_by_c:
+#                 most_similar_by_c[dystype] = [i]
+#             else:
+#                 most_similar_by_c[dystype].append(i)
+# print ('The nearset categories: ' )
+# print (most_similar_by_c)
+#
+# # # Getting the top similar sentences
+# most_similar_by_c2 = {}
+# for i in most_similar.keys():
+#     for dystype, e in thoughts_dict.items():
+#         if i in e:
+#             if dystype not in most_similar_by_c2:
+#                 most_similar_by_c2[dystype] = [most_similar[i]]
+#             else:
+#                 most_similar_by_c2[dystype].append(most_similar[i])
+# print ('The nearset categories 2: ' )
+# print (most_similar_by_c2)
+# #
+#
+#
+# # A function that utlizes get_most_similar to be used later
+# def get_thoughts_features(tweet):
+#     most_similar_types, emb,q, ids = sentence_sim2.get_most_similar(tweet)
+#     most_similar_by_c = {}
+#     for i in most_similar_types.keys():
+#         for c, e in thoughts_dict.items():
+#             if i in e:
+#                 if c not in most_similar_by_c:
+#                     most_similar_by_c[c] = [i]
+#                 else:
+#                     most_similar_by_c[c].append(i)
+#
+#     return most_similar_by_c
+# #
+# # A function that utlizes get_most_similar to be used later
+# # def get_thoughts_features2(tweet):
+# #     most_similar_types, emb,q = sentence_sim2.get_most_similar(tweet)
+# #     most_similar_by_c = {}
+# #     for i in most_similar_types.keys():
+# #         for c, e in thoughts_dict2.items():
+# #             if i in e:
+# #                 if c not in most_similar_by_c:
+# #                     most_similar_by_c[c] = [most_similar_types[i]]
+# #                 else:
+# #                     most_similar_by_c[c].append(most_similar_types[i])
+# #
+# #     return most_similar_by_c
 #
 # # go over all tweets and generate a list that contains the features vector for every tweet
-df_example = pd.read_csv('thoughts_categories.csv')
-df_tweets = pd.read_csv('experiment8-final-set.csv')
-tweets_emb = pd.read_csv('experiment8-emb.csv')
-
-
-featuresList = []
-#
-for tweet in all_tweets:
-    words_count = 0
-    featureDict = get_thoughts_features(tweet)  # get 7 top types of thinking and distances
-
-    words_count = len(str(tweet).split(" "))  # calculate words count feature
-
-    text = TextBlob(tweet)
-    pol = text.sentiment.polarity  # calculate polarity score
-    sub = text.sentiment.subjectivity  # calculate subjectivity score
-
-    featureDict['words count'] = words_count
-    featureDict['polarity'] = pol
-    featureDict['subjectivity'] = sub
-
-    tweet_features = []
-    tweet_features.append(tweet)
-    with open('features_names.txt', 'r') as feat_order:
-        for line in feat_order:
-            feature_name = line.strip()
-            if feature_name == 'tweet':
-                continue
-            elif feature_name in featureDict:
-                tweet_features.append(featureDict[feature_name])
-            else:
-                tweet_features.append(1)
-
-    # add the calss (1) for showing depression sympotoms (0) for no symptoms
-    if tweet in ard:
-        tweet_features.append(1)
-    else:
-        tweet_features.append(0)
-
-    # Append this features vector of the tweet onto the master featuresList
-    featuresList.append(tweet_features)
-
-# A function to output the calculated features to file
-def output(outputFilename, featuresList):
-    # open output file
-    outFile = open(outputFilename, 'w', encoding='utf8')
-
-    # Output header
-    # outFile.write('tweet\n')
-    with open('features_names.txt', 'r') as feat_order:
-        for line in feat_order:
-            feature_name = line.strip()
-            outFile.write(feature_name)
-            outFile.write(',')
-    outFile.write('Depressed\n')
-
-    # iterate over networks
-    for features in featuresList:
-        # iterate over each feature
-        for i in range(len(features)):
-            print(i)
-            if i > 0 and isinstance(features[i], list):
-                # get example embedding
-                ex = features[i][0]
-                ex_row = df_example[df_example['Example'] == ex]
-                ex_id  = ex_row['ID']
-
-                emb_vect = df1.loc[df1['example id'] == ex_id.values[0]]
-                emb_vect = emb_vect.values
-                emb_vect =emb_vect[0][1:]
-
-                diff_embed= np.subtract(tweet_vect, emb_vect)
-                diff_embed = list(diff_embed)
-                diff_embed = ','.join(map(str, diff_embed))
-                # diff_embed = ', '.join(diff_embed)
-                # print(diff_embed)
-                outFile.write(diff_embed)
-            elif i == 0:
-                outFile.write(str(features[i]))
-                # get tweets embedding
-                tw_row = df_tweets[df_tweets['tweet'] == features[i]]
-                tw_id = tw_row['tweet id']
-                # print(tw_id.values[0])
-                tweet_vect = tweets_emb.loc[tweets_emb['tweet id'] == tw_id.values[0]]
-                tweet_vect = tweet_vect.values
-                tweet_vect = tweet_vect[0][:-1]
-            else:
-                outFile.write(str(features[i]))
-            if i < len(features) - 1:
-                outFile.write(',')
-
-        outFile.write('\n')
-    print("Final dataset is created")
-    outFile.close()
-
-# output file for features
-outfilename = 'experiment8-final-set-emb.csv'
-# Output features to file
-output(outfilename, featuresList)
+# df_example = pd.read_csv('thoughts_categories.csv')
+# df_tweets = pd.read_csv('experiment5-final-set.csv')
+# tweets_emb = pd.read_csv('final-set5-emb.csv')
 #
 #
+# featuresList = []
+# #
+# for tweet in all_tweets:
+#     words_count = 0
+#     featureDict = get_thoughts_features(tweet)  # get 7 top types of thinking and distances
 #
+#     words_count = len(str(tweet).split(" "))  # calculate words count feature
+#
+#     text = TextBlob(tweet)
+#     pol = text.sentiment.polarity  # calculate polarity score
+#     sub = text.sentiment.subjectivity  # calculate subjectivity score
+#
+#     featureDict['words count'] = words_count
+#     featureDict['polarity'] = pol
+#     featureDict['subjectivity'] = sub
+#
+#     tweet_features = []
+#     tweet_features.append(tweet)
+#     with open('features_names.txt', 'r') as feat_order:
+#         for line in feat_order:
+#             feature_name = line.strip()
+#             if feature_name == 'tweet':
+#                 continue
+#             elif feature_name in featureDict:
+#                 tweet_features.append(featureDict[feature_name])
+#             else:
+#                 tweet_features.append(1)
+#
+#     # add the calss (1) for showing depression sympotoms (0) for no symptoms
+#     if tweet in ard:
+#         tweet_features.append(1)
+#     else:
+#         tweet_features.append(0)
+#
+#     # Append this features vector of the tweet onto the master featuresList
+#     featuresList.append(tweet_features)
+#
+# # A function to output the calculated features to file
+# def output(outputFilename, featuresList):
+#     # open output file
+#     outFile = open(outputFilename, 'w', encoding='utf8')
+#
+#     # Output header
+#     # outFile.write('tweet\n')
+#     with open('features_names_c.txt', 'r') as feat_order:
+#         for line in feat_order:
+#             feature_name = line.strip()
+#             outFile.write(feature_name)
+#             outFile.write(',')
+#     outFile.write('Depressed\n')
+#
+#     # iterate over networks
+#     for features in featuresList:
+#         # iterate over each feature
+#         for i in range(len(features)):
+#             if i > 0 and isinstance(features[i], list):
+#                 # get example embedding
+#                 ex = features[i][0]
+#                 ex_row = df_example[df_example['Example'] == ex]
+#                 ex_id  = ex_row['ID']
+#
+#                 emb_vect = df1.loc[df1['example id'] == ex_id.values[0]]
+#                 emb_vect = emb_vect.values
+#                 emb_vect =emb_vect[0][1:]
+#
+#                 diff_embed= np.subtract(tweet_vect, emb_vect)
+#                 diff_embed = list(str(diff_embed))
+#                 print(diff_embed)
+#                 diff_embed = ', '.join(diff_embed)
+#                 print(diff_embed)
+#
+#                 outFile.write(diff_embed)
+#             elif i == 0:
+#                 outFile.write(str(features[i]))
+#                 # get tweets embedding
+#                 tw_row = df_tweets[df_tweets['tweet'] == features[i]]
+#                 tw_id = tw_row['tweet id']
+#                 # print(tw_id.values[0])
+#                 tweet_vect = tweets_emb.loc[tweets_emb['tweet id'] == tw_id.values[0]]
+#                 tweet_vect = tweet_vect.values
+#                 tweet_vect = tweet_vect[0][1:]
+#             else:
+#                 outFile.write(str(features[i]))
+#             if i < len(features) - 1:
+#                 outFile.write(',')
+#             break
+#         outFile.write('\n')
+#     print("Final dataset is created")
+#     outFile.close()
+#
+# # output file for features
+# outfilename = 'experiment5-final-set-emb.csv'
+# # Output features to file
+# output(outfilename, featuresList)
 
-
-
-
-
-##############################################################################################
-##############################################################################################
-##############################################################################################
-
+# featuresList2 = []
+#
+# for tweet in all_tweets:
+#     words_count = 0
+#     featureDict = get_thoughts_features2(tweet)  # get 7 top types of thinking and distances
+#
+#     words_count = len(str(tweet).split(" "))  # calculate words count feature
+#
+#     text = TextBlob(tweet)
+#     pol = text.sentiment.polarity  # calculate polarity score
+#     sub = text.sentiment.subjectivity  # calculate subjectivity score
+#
+#     featureDict['words count'] = words_count
+#     featureDict['polarity'] = pol
+#     featureDict['subjectivity'] = sub
+#
+#     tweet_features = []
+#     tweet_features.append(tweet)
+#     with open('features_names.txt', 'r') as feat_order:
+#         for line in feat_order:
+#             feature_name = line.strip()
+#             if feature_name == 'tweet':
+#                 continue
+#             elif feature_name in featureDict:
+#                 tweet_features.append(featureDict[feature_name])
+#             else:
+#                 tweet_features.append(1)
+#
+#     # add the calss (1) for showing depression sympotoms (0) for no symptoms
+#     if tweet in ard:
+#         tweet_features.append(1)
+#     else:
+#         tweet_features.append(0)
+#
+#     # Append this features vector of the tweet onto the master featuresList
+#     featuresList2.append(tweet_features)
+#
+#
+# # A function to output the calculated features to file
+# def output2(outputFilename, featuresList):
+#     # open output file
+#     outFile = open(outputFilename, 'w', encoding='utf8')
+#
+#     # Output header
+#     # outFile.write('tweet\n')
+#     with open('features_names.txt', 'r') as feat_order:
+#         for line in feat_order:
+#             feature_name = line.strip()
+#             outFile.write(feature_name)
+#             outFile.write(',')
+#     outFile.write('Depressed\n')
+#
+#     # iterate over networks
+#     for features in featuresList2:
+#         # iterate over each feature
+#         for i in range(len(features)):
+#             if i > 0 and isinstance(features[i], list):
+#                 minn = min(features[i])
+#                 outFile.write(str(minn))
+#             else:
+#                 outFile.write(str(features[i]))
+#             if i < len(features) - 1:
+#                 outFile.write(',')
+#         outFile.write('\n')
+#     print("Final dataset is created")
+#     outFile.close()
+#
+# # output file for features
+# outfilename = 'experiment9-final-set-1anchor.csv'
+# # Output features to file
+# output(outfilename, featuresList2)
 
 #------------------------------------------------#
 #-----------------Experiments--------------------#
@@ -297,20 +484,62 @@ output(outfilename, featuresList)
 #
 #
 # vectorizer           = TfidfVectorizer()
-data1                 = pd.read_csv('experiment8-final-set-emb.csv')
-
-
-bert                 = pd.read_csv('experiment8-emb.csv')
-result = pd.merge(data1, bert, how="inner", on=["tweet id"])
-print(len(result))
-
-result= result.dropna()
-result.to_csv('bert-dys-emb-combined8.csv', index=False)
+data1                 = pd.read_csv('set5-emb-mean.csv')
+result = pd.read_csv("bert-dys-emb-combined.csv")
+bert       = result.iloc[:,5382:]
+print(bert)
+bert = bert.to_numpy()
+# data1= data1.dropna()
 #
-# print(len(result))
+# mean_emb = []
+# cl = []
+# for i,entity in tembd.iterrows():
+#     r = my_data[my_data['example id']==i]
+#     c = r['cluster']
+#     cl.append(int(c))
+#     array = my_data[my_data['cluster']==int(c)]
+#     m = np.mean(array, axis = 0)
+#     mean_emb.append(m)
+
+
+# #
+# # # data2                 = pd.read_csv('experiment9-final-set-LIWC-Analysis-paperC.csv')
+# # # data2= data2.dropna()
+# #
+# data2                 = pd.read_csv('experiment11-final-set.csv')
+# data2= data2.dropna()
+# #
+# #
+# # tfidf_features      = vectorizer.fit_transform(data1['tweet'].apply(lambda s: np.str_(s))).toarray()
 # # # # #
-# d1                    = data1.to_numpy()
-# x_d1                  = d1[:,1:]                                                     # 1:7   -> the proposed features, 7:11   -> the other common features
+# # # Perform PCA on tf-idf features
+# # # pca = PCA()
+# # # pca.fit(tfidf_features)
+# # # tfidf_features_pca = pca.transform(tfidf_features)
+# # # tfidf_df   = pd.DataFrame.from_records(tfidf_features_pca)
+# # # tfidf_df.to_csv('tfidf7.csv', index=False)
+# #
+# # #
+# # # print(data.Depressed.value_counts())
+# # # # Plot the cumulative sum to choose how many PC to use.
+# # # # cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
+# # # # plt.plot(range(0,tfidf_features_pca.shape[1]),cumulative_variance)
+# # # # plt.plot([0,len(pca.components_)],[0.9,0.9], '--', label='90% Variance')
+# # # # plt.xlabel('Number of Principal Components')
+# # # # plt.ylabel('% of total variance accounted for')
+# # # # plt.legend()
+# # # # plt.show()
+# # # # #
+# # # #
+# # #
+# # #
+# # #
+# # #
+# # #
+# bert                 = pd.read_csv('experiment7-emb.csv')
+# # # # #
+d1                    = data1.to_numpy()
+# x_d1                  = d1[:,1:11]                                                     # 1:7   -> the proposed features, 7:11   -> the other common features
 # #
 # d2                    = data2.to_numpy()
 # x_d2                  = d2[:,1:19]
@@ -345,7 +574,7 @@ result.to_csv('bert-dys-emb-combined8.csv', index=False)
 # # # all_features2     = np.concatenate((x_d2,tfidf_features_pcaed), axis=1)
 # #
 # # # tfliwc     = np.concatenate((d1[:,12:] ,tfidf_features_pcaed), axis=1)
-# # # all     = np.concatenate((d1[:,12:] ,all_features), axis=1)
+all     = np.concatenate((bert ,d1), axis=1)
 # # # all2     = np.concatenate((d1[:,12:] ,all_features2), axis=1)
 # #
 # # #
@@ -356,17 +585,8 @@ result.to_csv('bert-dys-emb-combined8.csv', index=False)
 # # # # # # 3- tf-idf features + the proposed features   (Excluding other common features)
 # # # # #
 # # # # # # 4- bert embeddings
-result = pd.read_csv("bert-dys-emb-combined8.csv")
-bert       = result.iloc[:,5382:]
-print(bert)
-bert = bert.to_numpy()
-dys = result.iloc[:,1:5377]
-print(dys)
-print(len(dys))
-dys = dys.to_numpy()
-
+# x       = tweets_embedding.to_numpy()
 y=result['Depressed'].astype('int')
-print(y)
 # #
 # # # run_exps(all_features,y, 'The report for using tfidf dys')
 # # # run_exps(tfidf_features_pcaed,y, 'The report for using tfidf ')
@@ -377,7 +597,7 @@ print(y)
 # liwc_bert1        = np.concatenate((d1[:,12:], x), axis=1)
 # new_bert1        = np.concatenate((x_d1[:,0:7], x), axis=1)
 # #
-bert_diff        = np.concatenate((bert, dys), axis=1)
+# bert_diff        = np.concatenate((x, diff_embed ), axis=1)
 # liwc_new_bert2        = np.concatenate((liwc_new2, x ), axis=1)
 # liwc_bert2        = np.concatenate((d2[:,21:], x), axis=1)
 # new_bert2        = np.concatenate((x_d2[:,0:18],x), axis=1)
@@ -583,18 +803,16 @@ from sklearn.metrics import roc_auc_score,accuracy_score, auc, average_precision
 #
 kfold = StratifiedKFold(n_splits=10, shuffle=False)
 model = LogisticRegression(penalty='l2', max_iter=10000000, solver='liblinear')
-
-# draw_cv_roc_curve(model, kfold,bert, y, title='Cross Validated ROC Of BERT exp 5 - emb')
-# draw_cv_pr_curve(model, kfold, bert, y, title='Cross Validated PR Curve Of BERT exp 5 - emb')
+#
+# draw_cv_roc_curve(model, kfold,all, y, title='Cross Validated ROC Of BERT exp 5')
+# draw_cv_pr_curve(model, kfold, x, y, title='Cross Validated PR Curve Of BERT exp 5')
 # #
-
+draw_cv_roc_curve(model, kfold, d1, y, title='Cross Validated ROC Of DIFF exp 5 - mean emb')
+draw_cv_pr_curve(model, kfold, d1, y, title='Cross Validated PR Curve Of DIFF exp 5 - mean emb')
 #
-draw_cv_roc_curve(model, kfold, bert_diff, y, title='Cross Validated ROC Of BERT & DIFF exp 8 - emb')
-draw_cv_pr_curve(model, kfold, bert_diff, y, title='Cross Validated PR Curve Of BERT & DIFF exp 8 - emb')
-
-draw_cv_roc_curve(model, kfold, dys, y, title='Cross Validated ROC Of DIFF exp 8 - emb')
-draw_cv_pr_curve(model, kfold, dys, y, title='Cross Validated PR Curve Of DIFF exp 8 - emb')
-#
+draw_cv_roc_curve(model, kfold, all, y, title='Cross Validated ROC Of BERT & DIFF exp 5 - mean emb')
+draw_cv_pr_curve(model, kfold, all, y, title='Cross Validated PR Curve Of BERT & DIFF exp 5 - mean emb')
+# #
 # # draw_cv_roc_curve(model, kfold, liwc_bert1, y, title='Cross Validated ROC Of LIWC + BERT')
 # # draw_cv_pr_curve(model, kfold, liwc_bert1, y, title='Cross Validated PR Curve Of LIWC + BERT')
 #
