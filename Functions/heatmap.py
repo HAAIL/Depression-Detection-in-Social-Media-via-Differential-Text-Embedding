@@ -13,7 +13,7 @@ from sklearn.metrics import roc_auc_score,accuracy_score, auc, average_precision
 from numpy import interp
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold, train_test_split, StratifiedKFold
-
+import csv
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -127,7 +127,7 @@ def draw_cv_roc_curve(classifier, cv, X, y, name,  title='ROC Curve'):
 
     i = 0
     for train, test in cv.split(X, y):
-        print(type(X))
+
         probas_ = classifier.fit(X[train], y[train]).predict_proba(X[test])
         # Compute ROC curve and area the curve
         fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
@@ -164,7 +164,7 @@ def draw_cv_roc_curve(classifier, cv, X, y, name,  title='ROC Curve'):
     plt.title(title)
     plt.legend(loc="lower right")
     plt.savefig(title + name + '.png', bbox_inches='tight')
-    plt.show()
+    # plt.show()
     return mean_auc, std_auc
 
 def draw_cv_pr_curve(classifier, cv, X, y, name, title='PR Curve'):
@@ -183,6 +183,8 @@ def draw_cv_pr_curve(classifier, cv, X, y, name, title='PR Curve'):
 
     i = 0
     for train, test in cv.split(X, y):
+
+
         probas_ = classifier.fit(X[train], y[train]).predict_proba(X[test])
 
         # Compute ROC curve and area the curve
@@ -213,8 +215,8 @@ def draw_cv_pr_curve(classifier, cv, X, y, name, title='PR Curve'):
     plt.ylabel('Precision')
     plt.title(title)
     plt.legend(loc="lower right")
-    plt.savefig(title + '.png', bbox_inches='tight')
-    plt.show()
+    plt.savefig(title + name +'.png', bbox_inches='tight')
+    # plt.show()
     return average_precision_score(y_real, y_proba)
 
 
@@ -287,12 +289,15 @@ def output(outputFilename, featuresList, title, df_example, df_emb_example):
                 outFile.write(',')
 
         outFile.write('\n')
-    print("Final dataset is created")
+    print("%s Final dataset is created" %title)
     outFile.close()
 
-aucs= []
-stds=[]
-prs=[]
+# Creates a list containing 5 lists, each of 8 items, all set to 0
+cat, ex = 8, 10
+aucs = [[0 for x in range(1,cat)] for y in range(1,ex)]
+stds = [[0 for x in range(1,cat)] for y in range(1,ex)]
+prs = [[0 for x in range(1,cat)] for y in range(1,ex)]
+
 
 def compute_perfomance(num_cat,num_ex,dysfunc_dataset, df_tweets):
     title  = str(num_cat) + str(num_ex)
@@ -303,7 +308,6 @@ def compute_perfomance(num_cat,num_ex,dysfunc_dataset, df_tweets):
     sub_df['ID'] = sub_df.index
     sub_df_examples = sub_df['Example']
     sub_df_features_names = sub_df['Category'].unique()
-    print(sub_df)
     sub_df.to_excel(title + '-thoughts_categories.xlsx',  index=False)
     sub_df.to_csv(title + '-thoughts_categories.csv',  index=False)
 
@@ -324,7 +328,6 @@ def compute_perfomance(num_cat,num_ex,dysfunc_dataset, df_tweets):
     emb_examples_df.to_csv(title + '-examples-emb.csv', index=False)
     df_emb_example = pd.read_csv(title + '-examples-emb.csv')
     df_emb_example['example id'] = sub_df['ID']
-    print(df_emb_example)
     thoughts_dict = {}
     xls = ExcelFile(title + '-thoughts_categories.xlsx')
     df = xls.parse(xls.sheet_names[0])
@@ -397,44 +400,59 @@ def compute_perfomance(num_cat,num_ex,dysfunc_dataset, df_tweets):
 
     dataset = pd.read_csv(title + '-experiment8-final-set-emb.csv', header=None)
     dataset.fillna(0)
-    print(dataset)
     dataset['Depressed'] = ys
     dataset.to_csv(title + '-experiment8-final-set-emb.csv',header=None)
-
+    y = dataset['Depressed']
     bert = pd.read_csv('experiment8-bert-original-emb.csv')
 
     mean_emb = []
     for i,entity in dataset.iterrows():
         dys = []
         for d in range (0,num_cat):
-            array = dataset.iloc[i,(d*768)+1:(d*768)+768]
+            array = dataset.iloc[i,(d*768)+1:(d*768)+769]
             dys.append(array.values)
 
         m = np.mean(dys, axis = 0)
         mean_emb.append(m)
 
     emb_mean_df = pd.DataFrame.from_records(mean_emb)
-    print(type(ys[0]))
-    emb_mean_df.to_csv(title +'-set8-emb-mean.csv', index=False)
+    emb_mean_df.to_csv(title +'-set8-emb-mean.csv')
     mean_emb = pd.read_csv(title +'-set8-emb-mean.csv')
+    mean_emb = mean_emb.iloc[:,1:]
+
     mean_emb = mean_emb.to_numpy()
     kfold = StratifiedKFold(n_splits=10, shuffle=False)
     model = LogisticRegression(penalty='l2', max_iter=10000000, solver='liblinear')
     name = title + 'exp8'
     # mean_emb = np.array(mean_emb)
-    mean_auc, std = draw_cv_roc_curve(model, kfold, mean_emb, ys, name, title='Cross Validated ROC')
-    pr            = draw_cv_pr_curve(model, kfold, mean_emb, ys, name, title='Cross Validated PR')
-    aucs[num_cat][num_ex].append(mean_auc)
-    stds[num_cat][num_ex].append(std)
-    prs[num_cat][num_ex].append(pr)
+    mean_auc, std = draw_cv_roc_curve(model, kfold, mean_emb, y, name, title='Cross Validated ROC')
+    pr            = draw_cv_pr_curve(model, kfold, mean_emb, y, name, title='Cross Validated PR')
+    aucs[num_cat][num_ex] = mean_auc
+    stds[num_cat][num_ex] = std
+    prs[num_cat][num_ex] = pr
 
 
 for i in range(1,8):
     for j in range(1,10):
         compute_perfomance(i,j,dt,df_tweets)
-        break
 
-print(aucs)
-print(stds)
-print(prs)
+
+with open("aucs-exp8.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(aucs)
+f.close()
+
+
+with open("stds-exp8.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(stds)
+f.close()
+
+
+with open("prs-exp8.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerows(prs)
+f.close()
+
+
 # compute_perfomance(2,3,dt, df_tweets)
